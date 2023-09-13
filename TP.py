@@ -68,10 +68,10 @@ class fis:
 
         nivel_acti = np.array(f).T
         print("nivel acti")
-        print(nivel_acti)
+       # print(nivel_acti)
         sumMu = np.vstack(np.sum(nivel_acti,axis=1))
         print("sumMu")
-        print(sumMu)
+      #  print(sumMu)
         P = np.c_[P, np.ones(len(P))]
         n_vars = P.shape[1]
 
@@ -92,7 +92,7 @@ class fis:
 
         solutions, residuals, rank, s = np.linalg.lstsq(A,b,rcond=None)
         self.solutions = solutions #.reshape(n_clusters,n_vars)
-        print(solutions)
+       # print(solutions)
         return 0
 
     def evalfis(self, data):
@@ -195,7 +195,7 @@ m = np.append(m,c3, axis=0)"""
 
 
 
-datos = np.loadtxt(r"D:\Carpetas de usuario\Documentos\Repos\IA2023\clustering\samplesVDA3.txt")
+datos = np.loadtxt(r"D:\Carpetas de usuario\Documentos\Repos\IA2023\samplesVDA3.txt")
 #print(datos)
 datosbi = np.zeros((len(datos),2))
 #print(datosbi)
@@ -237,11 +237,31 @@ data = np.vstack((data_x, data_y)).T
 fis2 = fis()
 fis2.genfis(data, 1.1)
 fis2.viewInputs()
-r = fis2.evalfis(np.vstack(data_x))
+r = fis2.evalfis(np.vstack(data_x))  #valores en y de la funcion sugeno
+
+error=0
+aux=0
+valoresMSE = []
+for i,valor in enumerate(data_y):
+    aux=(data_y[i]-r[i])**2
+    valoresMSE.append(aux)
+    #print ("Datay[",i,"]: ", data_y[i], " r[", i, "]: ", r[i], "Error relativo en el punto: ", aux)
+    error=error+aux
+
+valoresMSE = np.array(valoresMSE)
+
+print("Cantidad elementos data y: ", len(data_y))
+print("Cantidad elementos r: ", len(r))
+
+print("error cuadratico medio: ", error/len(data_y))
 
 plt.figure()
 plt.plot(data_x,data_y)
 plt.plot(data_x,r,linestyle='--')
+plt.show()
+
+plt.plot(np.arange(0,len(valoresMSE),1),valoresMSE)
+#plt.plot(valoresMSE,np.arange(0,len(valoresMSE),1))
 plt.show()
 
 fis2.solutions
