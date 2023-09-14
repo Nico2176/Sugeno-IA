@@ -26,11 +26,11 @@ class fisInput:
 
     def view(self):
         x = np.linspace(self.minValue,self.maxValue,20)
-        plt.figure()
+      #  plt.figure()                                                        //grafica las gaussianas !!!
         for m in self.centroids:
             s = (self.minValue-self.maxValue)/8**0.5
             y = gaussmf(x,m,s)
-            plt.plot(x,y)
+           # plt.plot(x,y)
 
 class fis:
     def __init__(self):
@@ -194,7 +194,7 @@ m = np.append(m,c3, axis=0)"""
 
 
 
-
+erroresPorRadio = []
 datos = np.loadtxt(r"D:\Carpetas de usuario\Documentos\Repos\IA2023\samplesVDA3.txt")
 #print(datos)
 datosbi = np.zeros((len(datos),2))
@@ -205,21 +205,112 @@ for i,valor in enumerate(datos):
      datosbi[i,1]=datos[i]
 #print(datosbi)
 
+arreglo_cantClusters = []
+for numero in range(3, 20, 1):
+    valor_decimal = numero / 10.0
+    print(valor_decimal)
+    arreglo_valores = []
+    
+    r,c = subclust2(datosbi,valor_decimal)
+    arreglo_valores.append(valor_decimal)
+    arreglo_cantClusters.append(c.shape[0])
+    def my_exponential(A, B, C, x):
+        return A*np.exp(-B*x)+C
 
-r,c = subclust2(datosbi,1)
+    #data_x = np.arange(-10,10,0.1)
+    data_x = datosbi[:,0]
+    #data_y = -0.5*data_x**3-0.6*data_x**2+10*data_x+1 #my_exponential(9, 0.5,1, data_x)
+    data_y = datosbi[:,1]
+   # plt.plot(data_x, data_y)
+    # plt.ylim(-20,20)
+   # plt.xlim(-7,7)
+
+    data = np.vstack((data_x, data_y)).T
+
+    fis2 = fis()
+    fis2.genfis(data, valor_decimal)
+    fis2.viewInputs()
+    r = fis2.evalfis(np.vstack(data_x))  #valores en y de la funcion sugeno
+
+    error=0
+    aux=0
+    valoresMSE = []
+    
+    for i,valor in enumerate(data_y):
+        aux=(data_y[i]-r[i])**2
+        valoresMSE.append(aux)
+      #  print ("Datay[",i,"]: ", data_y[i], " r[", i, "]: ", r[i], "Error relativo en el punto: ", aux)
+        error=error+aux
+
+    
+    valoresMSE = np.array(valoresMSE)
+
+    print("Cantidad elementos data y: ", len(data_y))
+    print("Cantidad elementos r: ", len(r))
+
+    print("error cuadratico medio: ", error/len(data_y))
+    erroresPorRadio.append(error/len(data_y))
+
+    """"
+    plt.figure()
+    titulo = "Cantidad de clusters: {}".format(c.shape[0])
+    plt.title(titulo)
+    plt.xlabel("Tiempo [ms]")
+    plt.ylabel("MSE")
+    plt.plot(data_x,data_y)
+    plt.plot(data_x,r,linestyle='--')
+ #   plt.show()
+    """
+    #plt.plot(np.arange(0,len(valoresMSE),1),valoresMSE)
+    #plt.plot(valoresMSE,np.arange(0,len(valoresMSE),1))
+   # plt.show()
+
+    fis2.solutions
+
+
+
+print("Valores: ", arreglo_valores)
+print("Cant Clusters: ", arreglo_cantClusters)
+
+valoresNP = np.array(arreglo_valores)
+cantClustersNP = np.array(arreglo_cantClusters)
+
+""" plt.figure()
+plt.title("Cant clusters vs radio intercluster")
+plt.grid(True)
+plt.xlabel("Radio intercluster")
+plt.ylabel("Clusters")
+plt.plot(arreglo_valores,arreglo_cantClusters,color='b')
+plt.show() """
+
+print("Errores: ", erroresPorRadio)
+print("Cant Clusters: ", arreglo_cantClusters)
+erroresPorRadio = np.array(erroresPorRadio)
+
+plt.figure()
+plt.title("R vs MSE")
+plt.grid(True)
+plt.xlabel("R")
+plt.ylabel("MSE")
+plt.plot(arreglo_cantClusters,erroresPorRadio,color='b')
+plt.show()
+
+
+
+
 
 # print("r:",r) R es la matriz de pertenencia de cada dato
 # print("c:",c) c es la matriz de clusters con las coordenadas de los centros de cluster. su cantidad de filas nos dará la cantidad de clusters
 
-plt.figure()
+"""plt.figure()
 plt.xlabel("Tiempo [ms]")  #plt.xlabel("Tiempo [2.5ms.]")
 plt.ylabel("VDA")
 plt.grid(False)   #cuadriculado
 plt.scatter(datosbi[:,0],datosbi[:,1], c=r)  
 plt.scatter(c[:,0],c[:,1], marker='X',color='m')
-plt.show()
+plt.show()"""
 
-
+exit()
 
 def my_exponential(A, B, C, x):
     return A*np.exp(-B*x)+C
@@ -235,7 +326,7 @@ plt.xlim(-7,7)
 data = np.vstack((data_x, data_y)).T
 
 fis2 = fis()
-fis2.genfis(data, 1.1)
+fis2.genfis(data, 1)
 fis2.viewInputs()
 r = fis2.evalfis(np.vstack(data_x))  #valores en y de la funcion sugeno
 
@@ -245,7 +336,7 @@ valoresMSE = []
 for i,valor in enumerate(data_y):
     aux=(data_y[i]-r[i])**2
     valoresMSE.append(aux)
-    #print ("Datay[",i,"]: ", data_y[i], " r[", i, "]: ", r[i], "Error relativo en el punto: ", aux)
+    print ("Datay[",i,"]: ", data_y[i], " r[", i, "]: ", r[i], "Error relativo en el punto: ", aux)
     error=error+aux
 
 valoresMSE = np.array(valoresMSE)
@@ -260,7 +351,7 @@ plt.plot(data_x,data_y)
 plt.plot(data_x,r,linestyle='--')
 plt.show()
 
-plt.plot(np.arange(0,len(valoresMSE),1),valoresMSE)
+#plt.plot(np.arange(0,len(valoresMSE),1),valoresMSE)
 #plt.plot(valoresMSE,np.arange(0,len(valoresMSE),1))
 plt.show()
 
