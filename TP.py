@@ -288,7 +288,7 @@ print("Cant Clusters: ", arreglo_cantClusters)
 erroresPorRadio = np.array(erroresPorRadio)
 
 plt.figure()
-plt.title("R vs MSE")
+plt.title("MSE vs R")
 plt.grid(True)
 plt.xlabel("R")
 plt.ylabel("MSE")
