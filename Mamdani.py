@@ -41,26 +41,29 @@ x_nota_concepto = np.arange(0,11,1)
 
 #aca defino los valores de las variables difusas
 nota_examen_baja = fuzz.trimf(x_nota_examen,[0,0,4])
-nota_examen_regular = fuzz.trimf(x_nota_examen,[0,4,10])
+nota_examen_regular = fuzz.trimf(x_nota_examen,[2,4,10])
 nota_examen_excelente = fuzz.trimf(x_nota_examen,[7,10,10])
 
 nota_concepto_baja = fuzz.trimf(x_nota_concepto,[0,0,4])
-nota_concepto_regular = fuzz.trimf(x_nota_concepto,[0,4,10])
+nota_concepto_regular = fuzz.trimf(x_nota_concepto,[2,4,10])
 nota_concepto_excelente = fuzz.trimf(x_nota_concepto,[7,10,10])
 
 nota_asignatura_baja = fuzz.trimf(x_nota_asignatura,[0,0,40])
-nota_asignatura_regular = fuzz.trimf(x_nota_asignatura,[0,40,100])
+nota_asignatura_regular = fuzz.trimf(x_nota_asignatura,[20,40,100])
 nota_asignatura_excelente = fuzz.trimf(x_nota_asignatura,[70,100,100])
 
 
-#aca cambias los valores de entrada
-pertenencia_examen_bajo = fuzz.interp_membership(x_nota_examen,nota_examen_baja,9.5)
-pertenencia_examen_regular = fuzz.interp_membership(x_nota_examen,nota_examen_regular,9.5)
-pertenencia_examen_excelente = fuzz.interp_membership(x_nota_examen,nota_examen_excelente,9.5)
+notaexamen=10
+notaconcepto=10
 
-pertenencia_concepto_baja = fuzz.interp_membership(x_nota_concepto,nota_concepto_baja,7.3)
-pertenencia_concepto_regular = fuzz.interp_membership(x_nota_concepto,nota_concepto_regular,7.3)
-pertenencia_concepto_excelente = fuzz.interp_membership(x_nota_concepto,nota_concepto_excelente,7.3)
+#aca cambias los valores de entrada
+pertenencia_examen_bajo = fuzz.interp_membership(x_nota_examen,nota_examen_baja,notaexamen)
+pertenencia_examen_regular = fuzz.interp_membership(x_nota_examen,nota_examen_regular,notaexamen)
+pertenencia_examen_excelente = fuzz.interp_membership(x_nota_examen,nota_examen_excelente,notaexamen)
+
+pertenencia_concepto_baja = fuzz.interp_membership(x_nota_concepto,nota_concepto_baja,notaconcepto)
+pertenencia_concepto_regular = fuzz.interp_membership(x_nota_concepto,nota_concepto_regular,notaconcepto)
+pertenencia_concepto_excelente = fuzz.interp_membership(x_nota_concepto,nota_concepto_excelente,notaconcepto)
 
 
 
@@ -113,6 +116,51 @@ print("pertenencia concepto bajo: ", pertenencia_concepto_baja)
 print("pertenencia concepto regular: ", pertenencia_concepto_regular)
 print("pertenencia concepto exc: ", pertenencia_concepto_excelente)
 
+
+#Regla 1: Si la nota del examen es baja y la nota de concepto es baja, regular o excelente, la nota de asignatura es baja
+Regla1 = np.fmax(pertenencia_concepto_baja,pertenencia_concepto_regular) #si es baja o regular
+Regla1 = np.fmax(Regla1,pertenencia_concepto_excelente) #o excelente
+Regla1 = np.fmin(Regla1,pertenencia_examen_bajo) #y la nota del examen baja
+activacionRegla1 = np.fmin(Regla1,nota_asignatura_baja) #la nota de la asignatura sera baja
+
+#Regla 2: Si la nota del examen es excelente y la nota de concepto es excelente, la nota de asignatura es excelente
+regla2 = np.fmin(pertenencia_concepto_excelente,pertenencia_examen_excelente)
+activacionRegla2 = np.fmin(regla2,nota_asignatura_excelente)
+
+#Regla 3: Si la nota del examen es excelente y la nota de concepto es baja o regular, la nota de la asignatura es regular
+regla3 = np.fmax(pertenencia_concepto_regular,pertenencia_concepto_baja)
+regla3 = np.fmin(regla3,pertenencia_examen_excelente)
+activacionRegla3 = np.fmin(regla3,nota_asignatura_regular)
+
+#Regla 4: Si la nota del examen es regular y la nota de concepto es baja, la nota de la asignatura es baja
+regla4 = np.fmin(pertenencia_examen_regular,pertenencia_concepto_baja)
+activacionRegla4 = np.fmin(regla4,nota_asignatura_baja)
+
+#Regla 5: Si la nota del examen es regular y la nota de concepto es excelente o regular, la nota de la asignatura es regular
+regla5 = np.fmax(pertenencia_concepto_excelente,pertenencia_concepto_regular)
+regla5 = np.fmin(regla5,pertenencia_examen_regular)
+activacionRegla5 = np.fmin(regla5,nota_asignatura_regular)
+
+print("activacion nota baja regular y excelente en ese orden:", activacionRegla1,activacionRegla3,activacionRegla2)
+fig, ax0 = plt.subplots(figsize=(8, 3))
+asignatura0 = np.zeros_like(x_nota_asignatura)
+
+ax0.fill_between(x_nota_asignatura, asignatura0, activacionRegla1, facecolor='b', alpha=0.7)
+ax0.plot(x_nota_asignatura, nota_asignatura_baja, 'b', linewidth=0.5, linestyle='--')
+ax0.fill_between(x_nota_asignatura, asignatura0, activacionRegla3, facecolor='g', alpha=0.7)
+ax0.plot(x_nota_asignatura, nota_asignatura_regular, 'g', linewidth=0.5, linestyle='--')
+ax0.fill_between(x_nota_asignatura,asignatura0, activacionRegla2, facecolor='r', alpha=0.7)
+ax0.plot(x_nota_asignatura, nota_asignatura_excelente, 'r', linewidth=0.5, linestyle='--')
+ax0.fill_between(x_nota_asignatura,asignatura0,activacionRegla4,facecolor='m',alpha=0.7)
+ax0.plot(x_nota_asignatura,nota_asignatura_baja, 'm',linewidth=0.5, linestyle='--')
+ax0.fill_between(x_nota_asignatura,asignatura0,activacionRegla5,facecolor='y',alpha=0.7)
+ax0.plot(x_nota_asignatura,nota_asignatura_regular, 'y',linewidth=0.5, linestyle='--')
+ax0.set_title('Output membership activity')
+
+
+aggregated = np.fmax(activacionRegla1,np.fmax(np.fmax(np.fmax(activacionRegla4,activacionRegla5),activacionRegla3),activacionRegla2))
+
+"""
 #Regla 1: Si la nota del examen es baja, la nota de asignatura es baja
 activacionNotaBaja = np.fmin(pertenencia_examen_bajo,nota_asignatura_baja)
 
@@ -133,7 +181,7 @@ ax0.fill_between(x_nota_asignatura, asignatura0, activacionNotaRegular, facecolo
 ax0.plot(x_nota_asignatura, nota_asignatura_regular, 'g', linewidth=0.5, linestyle='--')
 ax0.fill_between(x_nota_asignatura,asignatura0, activacionNotaExcelente, facecolor='r', alpha=0.7)
 ax0.plot(x_nota_asignatura, nota_asignatura_excelente, 'r', linewidth=0.5, linestyle='--')
-ax0.set_title('Output membership activity')
+ax0.set_title('Output membership activity')"""
 
 # Desactiva ejes superiores y derechos del subgráfico
 ax0.spines['top'].set_visible(False)
@@ -150,13 +198,14 @@ plt.show()
 
 
 # Agrega todas las tres funciones de membresía de salida juntas
-aggregated = np.fmax(activacionNotaBaja,np.fmax(activacionNotaRegular,activacionNotaExcelente))
+#aggregated = np.fmax(activacionNotaBaja,np.fmax(activacionNotaRegular,activacionNotaExcelente))
 
 
 
 
 # Calcula el resultado desfusificado
 nota_asignatura = fuzz.defuzz(x_nota_asignatura, aggregated, 'centroide')
+print("La nota final de asignatura es de ", nota_asignatura)
 notaasignatura_activation = fuzz.interp_membership(x_nota_asignatura, aggregated, nota_asignatura)  # para la visualización
 
 # Visualiza esto
