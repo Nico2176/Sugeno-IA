@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import time
 from sklearn.preprocessing import MinMaxScaler
 from scipy.spatial import distance_matrix
+from scipy.interpolate import interp1d
 
 def gaussmf(data, mean, sigma):
     return np.exp(-((data - mean)**2.) / (2 * sigma**2.))
@@ -45,7 +46,7 @@ class fis:
         start_time = time.time()
         labels, cluster_center = subclust2(data, radii)
 
-        print("--- %s seconds ---" % (time.time() - start_time))
+     #   print("--- %s seconds ---" % (time.time() - start_time))
         n_clusters = len(cluster_center)
 
         cluster_center = cluster_center[:,:-1]
@@ -67,10 +68,10 @@ class fis:
         f = [np.prod(gaussmf(P,cluster,sigma),axis=1) for cluster in self.rules]
 
         nivel_acti = np.array(f).T
-        print("nivel acti")
+       # print("nivel acti")
        # print(nivel_acti)
         sumMu = np.vstack(np.sum(nivel_acti,axis=1))
-        print("sumMu")
+      #  print("sumMu")
       #  print(sumMu)
         P = np.c_[P, np.ones(len(P))]
         n_vars = P.shape[1]
@@ -206,9 +207,10 @@ for i,valor in enumerate(datos):
 #print(datosbi)
 
 arreglo_cantClusters = []
+#plt.figure()
 for numero in range(3, 20, 1):
     valor_decimal = numero / 10.0
-    print(valor_decimal)
+   # print(valor_decimal)
     arreglo_valores = []
     
     r,c = subclust2(datosbi,valor_decimal)
@@ -245,22 +247,30 @@ for numero in range(3, 20, 1):
     
     valoresMSE = np.array(valoresMSE)
 
-    print("Cantidad elementos data y: ", len(data_y))
-    print("Cantidad elementos r: ", len(r))
+   # print("Cantidad elementos data y: ", len(data_y))
+    #print("Cantidad elementos r: ", len(r))
 
-    print("error cuadratico medio: ", error/len(data_y))
+    #print("error cuadratico medio: ", error/len(data_y))
     erroresPorRadio.append(error/len(data_y))
 
-    """"
+    
+    if (c.shape[0]==5): #guardo los datos de cuando son 5 clusters (mejor dato) (medio hardcodeado pero para probar unga unga unga 🐒)
+        mejorX=data_x
+        mejorY=data_y
+        print("Datos x pre sobremuestreo: ", data_x)
+        print("Datos y pre sobremuestreo: ", data_y)
+
     plt.figure()
     titulo = "Cantidad de clusters: {}".format(c.shape[0])
     plt.title(titulo)
     plt.xlabel("Tiempo [ms]")
     plt.ylabel("MSE")
+   # plt.pause(3)
+    #plt.clf()
     plt.plot(data_x,data_y)
     plt.plot(data_x,r,linestyle='--')
  #   plt.show()
-    """
+    
     #plt.plot(np.arange(0,len(valoresMSE),1),valoresMSE)
     #plt.plot(valoresMSE,np.arange(0,len(valoresMSE),1))
    # plt.show()
@@ -269,8 +279,8 @@ for numero in range(3, 20, 1):
 
 
 
-print("Valores: ", arreglo_valores)
-print("Cant Clusters: ", arreglo_cantClusters)
+#print("Valores: ", arreglo_valores)
+#print("Cant Clusters: ", arreglo_cantClusters)
 
 valoresNP = np.array(arreglo_valores)
 cantClustersNP = np.array(arreglo_cantClusters)
@@ -283,8 +293,8 @@ plt.ylabel("Clusters")
 plt.plot(arreglo_valores,arreglo_cantClusters,color='b')
 plt.show() """
 
-print("Errores: ", erroresPorRadio)
-print("Cant Clusters: ", arreglo_cantClusters)
+#print("Errores: ", erroresPorRadio)
+#print("Cant Clusters: ", arreglo_cantClusters)
 erroresPorRadio = np.array(erroresPorRadio)
 
 plt.figure()
@@ -295,8 +305,19 @@ plt.ylabel("MSE")
 plt.plot(arreglo_cantClusters,erroresPorRadio,color='b')
 plt.show()
 
+plt.figure()
+plt.title("Grafico sobremuestreado")
+interp_func = interp1d(mejorX,mejorY, kind='cubic')         #metodo de scipy para sobremuestrear datos 
+# Sobremuestrear en el mismo rango de X con una mayor resolución
+nuevos_X = np.linspace(mejorX.min(), mejorX.max(), num=1000)  # Generar 1000 puntos en el mismo rango de X
 
+# Evaluar la función interpolante en los nuevos puntos
+nuevos_Y = interp_func(nuevos_X)
 
+print("Datos x post sobremuestreo: ", nuevos_X)
+print("Datos y post sobremuestreo: ", nuevos_Y)
+plt.plot(nuevos_X,nuevos_Y,color='m')
+plt.show()
 
 
 # print("r:",r) R es la matriz de pertenencia de cada dato
