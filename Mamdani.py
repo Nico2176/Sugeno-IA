@@ -34,7 +34,7 @@ tip_md = fuzz.trimf(x_tip, [0, 13, 25])
 tip_hi = fuzz.trimf(x_tip, [13, 25, 25])
 
 
-x_nota_asignatura = np.arange(0,101,1)
+x_nota_asignatura = np.arange(-40,141,1)
 x_nota_examen = np.arange(0,11,1)
 x_nota_concepto = np.arange(0,11,1)
 
@@ -48,13 +48,13 @@ nota_concepto_baja = fuzz.trimf(x_nota_concepto,[0,0,4])
 nota_concepto_regular = fuzz.trimf(x_nota_concepto,[2,4,10])
 nota_concepto_excelente = fuzz.trimf(x_nota_concepto,[7,10,10])
 
-nota_asignatura_baja = fuzz.trimf(x_nota_asignatura,[0,0,40])
-nota_asignatura_regular = fuzz.trimf(x_nota_asignatura,[20,40,100])
-nota_asignatura_excelente = fuzz.trimf(x_nota_asignatura,[70,100,100])
+nota_asignatura_baja = fuzz.trimf(x_nota_asignatura,[-40,0,41])
+nota_asignatura_regular = fuzz.trimf(x_nota_asignatura,[20,50,100])
+nota_asignatura_excelente = fuzz.trimf(x_nota_asignatura,[60,100,140])
 
 
-notaexamen=10
-notaconcepto=10
+notaexamen=5
+notaconcepto=7
 
 #aca cambias los valores de entrada
 pertenencia_examen_bajo = fuzz.interp_membership(x_nota_examen,nota_examen_baja,notaexamen)
@@ -204,7 +204,7 @@ plt.show()
 
 
 # Calcula el resultado desfusificado
-nota_asignatura = fuzz.defuzz(x_nota_asignatura, aggregated, 'centroide')
+nota_asignatura = fuzz.defuzz(x_nota_asignatura, aggregated, 'centroid')
 print("La nota final de asignatura es de ", nota_asignatura)
 notaasignatura_activation = fuzz.interp_membership(x_nota_asignatura, aggregated, nota_asignatura)  # para la visualización
 
