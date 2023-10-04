@@ -1,6 +1,4 @@
-"""Subtractive Clustering Algorithm
-"""
-__author__ = 'Daniel Albornoz'
+#Ojo, abre muchas ventanas de una vez. 
 
 
 import numpy as np
@@ -166,37 +164,14 @@ def subclust2(data, Ra, Rb=0, AcceptRatio=0.3, RejectRatio=0.1):
     return labels, centers
 
 
-
-#test commit con comandos che
-
-
-
-
-# c1 = np.random.rand(15,2)+[1,1]
-# c2 = np.random.rand(10,2)+[10,1.5]
-# c3 = np.random.rand(5,2)+[4.9,5.8]
-# m = np.append(c1,c2, axis=0)
-# m = np.append(m,c3, axis=0)
-
-# r,c = subclust2(m,2)
-
-# plt.figure()
-# plt.scatter(m[:,0],m[:,1])
-# plt.scatter(c[:,0],c[:,1], marker='X')
-# print(c)
      
 
-"""c1 = np.random.rand(150,2)+[1,1]
-c2 = np.random.rand(100,2)+[10,1.5]
-c3 = np.random.rand(50,2)+[4.9,5.8]
-m = np.append(c1,c2, axis=0)
-m = np.append(m,c3, axis=0)"""
 
 
 
 
 erroresPorRadio = []
-datos = np.loadtxt(r"D:\Carpetas de usuario\Documentos\Repos\IA2023\samplesVDA3.txt")
+datos = np.loadtxt(r"D:\Carpetas de usuario\Documentos\Repos\IA2023\samplesVDA3.txt") #no pude ponerle una ruta relativa :(
 #print(datos)
 datosbi = np.zeros((len(datos),2))
 #print(datosbi)
@@ -205,6 +180,12 @@ for i,valor in enumerate(datos):
      datosbi[i,0]=i*2.5   #2.5 para que las unidades queden en ms, ver luego si es conveniente
      datosbi[i,1]=datos[i]
 #print(datosbi)
+
+plt.title("Variación del diámetro arterial")
+plt.xlabel("Tiempo[ms]")
+plt.ylabel("VDA[mmHg?]")
+plt.plot(datosbi[:,0],datosbi[:,1])
+plt.show()
 
 arreglo_cantClusters = []
 #plt.figure()
@@ -223,7 +204,18 @@ for numero in range(3, 20, 1):
     data_x = datosbi[:,0]
     #data_y = -0.5*data_x**3-0.6*data_x**2+10*data_x+1 #my_exponential(9, 0.5,1, data_x)
     data_y = datosbi[:,1]
-   # plt.plot(data_x, data_y)
+
+    plt.figure()      #GRAFICA CON CLUSTERS
+    titulo = "Cantidad de clusters: {}".format(c.shape[0])
+    """plt.title(titulo)
+    plt.xlabel("Tiempo [ms]")  #plt.xlabel("Tiempo [2.5ms.]")
+    plt.ylabel("VDA")
+    plt.grid(False)   #cuadriculado
+    plt.scatter(datosbi[:,0],datosbi[:,1], c=r)  
+    plt.scatter(c[:,0],c[:,1], marker='X',color='m')
+    plt.show() """
+
+   
     # plt.ylim(-20,20)
    # plt.xlim(-7,7)
 
@@ -254,17 +246,17 @@ for numero in range(3, 20, 1):
     erroresPorRadio.append(error/len(data_y))
 
     
-    if (c.shape[0]==5): #guardo los datos de cuando son 5 clusters (mejor dato) (medio hardcodeado pero para probar unga unga unga 🐒)
+    if (c.shape[0]==5): #guardo los datos de cuando son 5 clusters (mejor dato, hardcodeado pero para probar)
         mejorX=data_x
         mejorY=data_y
         print("Datos x pre sobremuestreo: ", data_x)
         print("Datos y pre sobremuestreo: ", data_y)
 
     plt.figure()
-    titulo = "Cantidad de clusters: {}".format(c.shape[0])
+    titulo = "Sugeno - reglas: {}".format(c.shape[0])
     plt.title(titulo)
     plt.xlabel("Tiempo [ms]")
-    plt.ylabel("MSE")
+    plt.ylabel("VDA")
    # plt.pause(3)
     #plt.clf()
     plt.plot(data_x,data_y)
@@ -314,6 +306,8 @@ nuevos_X = np.linspace(mejorX.min(), mejorX.max(), num=1000)  # Generar 1000 pun
 # Evaluar la función interpolante en los nuevos puntos
 nuevos_Y = interp_func(nuevos_X)
 
+plt.xlabel("Tiempo [ms]")
+plt.ylabel("VDA")
 print("Datos x post sobremuestreo: ", nuevos_X)
 print("Datos y post sobremuestreo: ", nuevos_Y)
 plt.plot(nuevos_X,nuevos_Y,color='m')
@@ -333,47 +327,3 @@ plt.show()"""
 
 exit()
 
-def my_exponential(A, B, C, x):
-    return A*np.exp(-B*x)+C
-
-#data_x = np.arange(-10,10,0.1)
-data_x = datosbi[:,0]
-#data_y = -0.5*data_x**3-0.6*data_x**2+10*data_x+1 #my_exponential(9, 0.5,1, data_x)
-data_y = datosbi[:,1]
-plt.plot(data_x, data_y)
-# plt.ylim(-20,20)
-plt.xlim(-7,7)
-
-data = np.vstack((data_x, data_y)).T
-
-fis2 = fis()
-fis2.genfis(data, 1)
-fis2.viewInputs()
-r = fis2.evalfis(np.vstack(data_x))  #valores en y de la funcion sugeno
-
-error=0
-aux=0
-valoresMSE = []
-for i,valor in enumerate(data_y):
-    aux=(data_y[i]-r[i])**2
-    valoresMSE.append(aux)
-    print ("Datay[",i,"]: ", data_y[i], " r[", i, "]: ", r[i], "Error relativo en el punto: ", aux)
-    error=error+aux
-
-valoresMSE = np.array(valoresMSE)
-
-print("Cantidad elementos data y: ", len(data_y))
-print("Cantidad elementos r: ", len(r))
-
-print("error cuadratico medio: ", error/len(data_y))
-
-plt.figure()
-plt.plot(data_x,data_y)
-plt.plot(data_x,r,linestyle='--')
-plt.show()
-
-#plt.plot(np.arange(0,len(valoresMSE),1),valoresMSE)
-#plt.plot(valoresMSE,np.arange(0,len(valoresMSE),1))
-plt.show()
-
-fis2.solutions
