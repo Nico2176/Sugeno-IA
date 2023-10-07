@@ -53,8 +53,8 @@ nota_asignatura_regular = fuzz.trimf(x_nota_asignatura,[20,50,100])
 nota_asignatura_excelente = fuzz.trimf(x_nota_asignatura,[60,100,140])
 
 
-notaexamen=5
-notaconcepto=7
+notaexamen=7
+notaconcepto=5
 
 #aca cambias los valores de entrada
 pertenencia_examen_bajo = fuzz.interp_membership(x_nota_examen,nota_examen_baja,notaexamen)
